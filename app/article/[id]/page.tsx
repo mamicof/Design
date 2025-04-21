@@ -2,25 +2,25 @@
 
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ChevronRight, ArrowLeft } from "lucide-react"
+import { ChevronRight, ArrowLeft, Calendar, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 
 // サンプルデータ
 const articles = [
   {
     id: 1,
     title: "色彩理論の基本",
-    category: "UIデザイン",
+    category: "UIデザイン", // 大カテゴリ
+    subcategory: "色彩理論", // 中カテゴリ
     tags: ["初心者向け", "基礎知識", "UIデザイン"],
     date: "2024年3月15日",
+    updatedDate: "2024年3月20日",
     author: "田中デザイン",
-    featuredImage: "/placeholder.svg?height=400&width=800",
     content: [
       {
         heading: "色彩理論とは",
@@ -92,16 +92,41 @@ const articles = [
       },
     ],
   },
-  // 他の記事データ...
+  {
+    id: 2,
+    title: "タイポグラフィの基礎",
+    category: "UIデザイン", // 大カテゴリ
+    subcategory: "タイポグラフィ", // 中カテゴリ
+    tags: ["初心者向け", "基礎知識", "タイポグラフィ"],
+    date: "2024年3月10日",
+    updatedDate: "2024年3月12日",
+    author: "佐藤デザイン",
+    content: [
+      {
+        heading: "タイポグラフィとは",
+        id: "what-is-typography",
+        content: `タイポグラフィは、文字の配置や書体の選択によって、テキストを視覚的に効果的に表現する技術です。読みやすさと美しさを両立させることが重要です。`,
+      },
+      {
+        heading: "フォントの種類",
+        id: "font-types",
+        content: `主なフォントの種類には以下があります：
+
+1. **セリフ体**: 文字の端に装飾（セリフ）がある書体。例：Times New Roman
+2. **サンセリフ体**: 装飾のない直線的な書体。例：Helvetica
+3. **モノスペース**: すべての文字が同じ幅を持つ書体。例：Courier New
+4. **スクリプト体**: 手書き風の書体。例：Brush Script`,
+      },
+    ],
+  },
 ]
 
 export default function ArticlePage() {
   const params = useParams()
   const router = useRouter()
   const id = Number(params.id)
-  const [article, setArticle] = useState(null)
+  const [article, setArticle] = useState<any>(null)
   const [activeHeading, setActiveHeading] = useState("")
-  const [contentSections, setContentSections] = useState([])
   const [isArticleFound, setIsArticleFound] = useState(false)
 
   useEffect(() => {
@@ -109,14 +134,38 @@ export default function ArticlePage() {
     const foundArticle = articles.find((article) => article.id === id)
     if (foundArticle) {
       setArticle(foundArticle)
-      setContentSections(foundArticle.content)
       setIsArticleFound(true)
     } else {
       setArticle(null)
-      setContentSections([])
       setIsArticleFound(false)
     }
   }, [id])
+
+  // スクロール位置に基づいて現在のセクションを更新
+  useEffect(() => {
+    if (!article) return
+
+    const handleScroll = () => {
+      const headings = article.content.map((section: any) => section.id)
+
+      for (const id of headings) {
+        const element = document.getElementById(id)
+        if (element) {
+          const rect = element.getBoundingClientRect()
+          if (rect.top <= 100) {
+            setActiveHeading(id)
+          }
+        }
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    handleScroll() // 初期化時に実行
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [article])
 
   // 記事が見つからない場合
   if (!isArticleFound) {
@@ -130,29 +179,14 @@ export default function ArticlePage() {
     )
   }
 
-  // スクロール位置に基づいて現在のセクションを更新
-  const handleScroll = useCallback(() => {
-    const headings = contentSections.map((section) => section.id)
-
-    for (const id of headings) {
-      const element = document.getElementById(id)
-      if (element) {
-        const rect = element.getBoundingClientRect()
-        if (rect.top <= 100) {
-          setActiveHeading(id)
-        }
-      }
-    }
-  }, [contentSections])
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll)
-    handleScroll() // 初期化時に実行
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [handleScroll])
+  // 記事データがロード中の場合
+  if (!article) {
+    return (
+      <div className="max-w-5xl mx-auto p-6 text-center">
+        <p>読み込み中...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -166,35 +200,29 @@ export default function ArticlePage() {
           {article.category}
         </Link>
         <ChevronRight className="h-4 w-4 mx-1" />
+        <Link href={`/category/${article.subcategory.toLowerCase()}`} className="hover:text-gray-900">
+          {article.subcategory}
+        </Link>
+        <ChevronRight className="h-4 w-4 mx-1" />
         <span className="text-gray-900">{article.title}</span>
       </nav>
-
-      {/* アイキャッチ画像 */}
-      <div className="relative w-full h-[300px] mb-8 rounded-lg overflow-hidden">
-        <Image
-          src={article.featuredImage || "/placeholder.svg?height=400&width=800"}
-          alt={article.title}
-          fill
-          className="object-cover"
-        />
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-10">
         {/* 目次 */}
         <div className="hidden md:block">
           <div className="sticky top-6">
-            <h3 className="font-semibold mb-4 text-gray-900">目次</h3>
+            <h3 className="font-medium mb-3">目次</h3>
             <ScrollArea className="h-[calc(100vh-150px)]">
               <ul className="space-y-1 pr-4">
-                {contentSections.map((section) => (
+                {article.content.map((section: any) => (
                   <li key={section.id}>
                     <a
                       href={`#${section.id}`}
                       className={cn(
-                        "block py-2 text-sm hover:text-gray-900 transition-colors border-l-2 pl-3",
+                        "block py-1 text-sm hover:text-foreground transition-colors border-l-2 pl-3",
                         activeHeading === section.id
-                          ? "border-primary text-primary font-medium"
-                          : "border-gray-100 text-gray-500",
+                          ? "border-primary text-foreground font-medium"
+                          : "border-gray-100 text-muted-foreground",
                       )}
                     >
                       {section.heading}
@@ -208,25 +236,96 @@ export default function ArticlePage() {
 
         {/* 記事本文 */}
         <article>
+          {/* タイトル */}
           <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <Badge>{article.category}</Badge>
-            {article.tags.length > 0 && <Badge variant="outline">{article.tags[0]}</Badge>}
-            <span className="text-sm text-gray-500 ml-auto">
-              {article.date} | {article.author}
-            </span>
+
+          {/* カテゴリとタグ */}
+          <div className="flex flex-wrap gap-3 mb-4">
+            <Link href={`/category/${article.category.toLowerCase()}`}>
+              <Badge className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                {article.category}
+              </Badge>
+            </Link>
+            <Link href={`/category/${article.subcategory.toLowerCase()}`}>
+              <Badge className="bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 transition-colors">
+                {article.subcategory}
+              </Badge>
+            </Link>
+
+            {article.tags.map((tag: string) => (
+              <Link key={tag} href={`/tag/${encodeURIComponent(tag)}`}>
+                <Badge className="bg-white/70 text-gray-600 hover:bg-gray-200/50 hover:text-gray-900 transition-colors">
+                  {tag}
+                </Badge>
+              </Link>
+            ))}
           </div>
+
+          {/* 日付情報 */}
+          <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-6">
+            <div className="flex items-center">
+              <Calendar className="h-4 w-4 mr-1" />
+              <span>作成: {article.date}</span>
+            </div>
+            {article.updatedDate && (
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 mr-1" />
+                <span>更新: {article.updatedDate}</span>
+              </div>
+            )}
+          </div>
+
           <Separator className="mb-8" />
 
+          {/* 記事コンテンツ */}
           <div className="prose prose-slate max-w-none">
-            {contentSections.map((section) => (
+            {article.content.map((section: any) => (
               <section key={section.id} id={section.id} className="mb-10 scroll-mt-6">
                 <h2 className="text-2xl font-semibold mb-4">{section.heading}</h2>
-                {section.content.split("\n\n").map((paragraph, index) => (
-                  <p key={index} className="mb-4 text-gray-700">
-                    {paragraph}
-                  </p>
-                ))}
+                {section.content.split("\n\n").map((paragraph: string, index: number) => {
+                  // リスト項目の処理
+                  if (paragraph.match(/^\d+\.\s/)) {
+                    return (
+                      <ol key={index} className="list-decimal pl-6 mb-4">
+                        {paragraph.split("\n").map((item, i) => {
+                          const listItem = item.replace(/^\d+\.\s/, "")
+                          return (
+                            <li key={i} className="mb-1">
+                              {listItem}
+                            </li>
+                          )
+                        })}
+                      </ol>
+                    )
+                  } else if (paragraph.match(/^-\s/)) {
+                    return (
+                      <ul key={index} className="list-disc pl-6 mb-4">
+                        {paragraph.split("\n").map((item, i) => {
+                          const listItem = item.replace(/^-\s/, "")
+                          return (
+                            <li key={i} className="mb-1">
+                              {listItem}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )
+                  }
+
+                  // マークダウン記法の処理
+                  const formattedParagraph = paragraph
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // 太字
+                    .replace(/\*(.*?)\*/g, "<em>$1</em>") // 斜体
+                    .replace(/\[([^\]]+)\]$$([^)]+)$$/g, '<a href="$2" class="text-primary hover:underline">$1</a>') // リンク
+
+                  return (
+                    <p
+                      key={index}
+                      className="mb-4 text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: formattedParagraph }}
+                    />
+                  )
+                })}
               </section>
             ))}
           </div>

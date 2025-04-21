@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, ImageIcon } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { MarkdownEditor } from "@/components/markdown-editor"
 import { MarkdownPreview } from "@/components/markdown-preview"
-import { Textarea } from "@/components/ui/textarea"
 
 // サンプルデータ
 const categories = [
@@ -42,9 +41,6 @@ export default function NewArticlePage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
   const [activeTab, setActiveTab] = useState("edit")
-  const [imagePrompt, setImagePrompt] = useState("")
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null)
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
 
   // タグの追加
   const addTag = () => {
@@ -59,20 +55,6 @@ export default function NewArticlePage() {
     setSelectedTags(selectedTags.filter((t) => t !== tag))
   }
 
-  // 画像生成
-  const generateImage = () => {
-    if (!imagePrompt) return
-
-    setIsGeneratingImage(true)
-
-    // 実際のアプリケーションではAI画像生成APIを呼び出す
-    // ここではモックとして、タイムアウト後にプレースホルダー画像を設定
-    setTimeout(() => {
-      setGeneratedImage(`/placeholder.svg?height=400&width=800&text=${encodeURIComponent(imagePrompt)}`)
-      setIsGeneratingImage(false)
-    }, 1500)
-  }
-
   // 記事の保存
   const saveArticle = (isDraft: boolean) => {
     // ここで記事データを保存する処理を実装
@@ -81,7 +63,6 @@ export default function NewArticlePage() {
       content,
       category,
       tags: selectedTags,
-      featuredImage: generatedImage,
       status: isDraft ? "下書き" : "公開",
     })
 
@@ -160,64 +141,6 @@ export default function NewArticlePage() {
                 </button>
               </Badge>
             ))}
-          </div>
-        </div>
-
-        {/* アイキャッチ画像 */}
-        <div>
-          <Label htmlFor="featured-image">アイキャッチ画像</Label>
-          <div className="mt-1 border-2 border-dashed rounded-md p-6">
-            <div className="flex flex-col items-center gap-4">
-              {generatedImage ? (
-                <div className="relative w-full h-[200px] rounded-md overflow-hidden">
-                  <img
-                    src={generatedImage || "/placeholder.svg"}
-                    alt="生成された画像"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <ImageIcon className="h-8 w-8 text-gray-400" />
-              )}
-
-              <div className="w-full">
-                <Label htmlFor="image-prompt">画像の説明</Label>
-                <Textarea
-                  id="image-prompt"
-                  value={imagePrompt}
-                  onChange={(e) => setImagePrompt(e.target.value)}
-                  placeholder="画像の説明を入力すると、AIが自動的に画像を生成します"
-                  className="mt-1"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={generateImage}
-                  disabled={!imagePrompt || isGeneratingImage}
-                  className="w-full"
-                >
-                  {isGeneratingImage ? "生成中..." : "画像を生成"}
-                </Button>
-
-                {generatedImage && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setGeneratedImage(null)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    削除
-                  </Button>
-                )}
-              </div>
-
-              <p className="text-xs text-muted-foreground text-center">または</p>
-
-              <Button variant="outline" size="sm" className="w-full">
-                画像をアップロード
-              </Button>
-            </div>
           </div>
         </div>
 

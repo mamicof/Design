@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "デザインWiki",
   description: "デザインに関する知識を集めたWikiサイト",
   robots: "noindex, nofollow", // 検索エンジンからのインデックスを防止
+  icons: {
+    icon: "/favicon.ico",
+  },
     generator: 'v0.dev'
 }
 
@@ -21,6 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <div className="flex h-screen overflow-hidden bg-background">

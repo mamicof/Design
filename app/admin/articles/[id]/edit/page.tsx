@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, ImageIcon } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -61,7 +61,6 @@ const articlesData = {
     category: "UIデザイン",
     tags: ["初心者向け", "基礎知識", "UIデザイン"],
     status: "公開",
-    image: "/placeholder.svg?height=200&width=300",
   },
   2: {
     title: "タイポグラフィの基礎",
@@ -97,7 +96,6 @@ Webデザインでは、以下の点に注意してタイポグラフィを設�
     category: "UIデザイン",
     tags: ["初心者向け", "基礎知識", "タイポグラフィ"],
     status: "公開",
-    image: "/placeholder.svg?height=200&width=300",
   },
 }
 
@@ -227,19 +225,6 @@ export default function EditArticlePage() {
                 </button>
               </Badge>
             ))}
-          </div>
-        </div>
-
-        {/* アイキャッチ画像 */}
-        <div>
-          <Label htmlFor="featured-image">アイキャッチ画像</Label>
-          <div className="mt-1 border-2 border-dashed rounded-md p-6 text-center">
-            <ImageIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-            <p className="text-sm text-gray-500">画像をドラッグ&ドロップするか、クリックしてアップロード</p>
-            <Input id="featured-image" type="file" accept="image/*" className="hidden" />
-            <Button variant="outline" size="sm" className="mt-2">
-              画像を選択
-            </Button>
           </div>
         </div>
 

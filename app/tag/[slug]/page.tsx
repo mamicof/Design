@@ -1,10 +1,8 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { ArticleCard } from "@/components/article-card"
 
 // サンプルデータ
 const articles = [
@@ -12,41 +10,46 @@ const articles = [
     id: 1,
     title: "色彩理論の基本",
     category: "UIデザイン",
+    subcategory: "色彩理論",
     tags: ["初心者向け", "基礎知識", "UIデザイン"],
-    image: "/placeholder.svg?height=200&width=300",
     date: "2024年3月15日",
+    author: "田中デザイン",
   },
   {
     id: 2,
     title: "タイポグラフィの基礎とフォント選びのポイント",
     category: "UIデザイン",
+    subcategory: "タイポグラフィ",
     tags: ["初心者向け", "基礎知識", "タイポグラフィ"],
-    image: "/placeholder.svg?height=200&width=300",
     date: "2024年3月10日",
+    author: "佐藤デザイン",
   },
   {
     id: 3,
     title: "Figmaの使い方",
     category: "デザインツール",
+    subcategory: "Figma",
     tags: ["チュートリアル", "ツール", "Figma"],
-    image: "/placeholder.svg?height=200&width=300",
     date: "2024年2月28日",
+    author: "高橋デザイン",
   },
   {
     id: 4,
     title: "ユーザーリサーチの方法",
     category: "UXデザイン",
+    subcategory: "ユーザーリサーチ",
     tags: ["UXデザイン", "基礎知識", "ユーザーリサーチ"],
-    image: "/placeholder.svg?height=200&width=300",
     date: "2024年2月20日",
+    author: "鈴木デザイン",
   },
   {
     id: 7,
     title: "アクセシブルなデザインの作り方",
-    category: "アクセシビリティ",
+    category: "UIデザイン",
+    subcategory: "アクセシビリティ",
     tags: ["アクセシビリティ", "基礎知識", "UIデザイン"],
-    image: "/placeholder.svg?height=200&width=300",
     date: "2024年1月25日",
+    author: "伊藤デザイン",
   },
 ]
 
@@ -64,33 +67,9 @@ export default function TagPage() {
       <Separator className="mb-8" />
 
       {filteredArticles.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {filteredArticles.map((article) => (
-            <Link key={article.id} href={`/article/${article.id}`} className="block group">
-              <div className="overflow-hidden rounded-lg shadow-sm transition-all group-hover:shadow-md h-[220px] flex flex-col">
-                <div className="relative h-24 w-full overflow-hidden">
-                  <Image
-                    src={article.image || "/placeholder.svg"}
-                    alt={article.title}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-3 bg-white flex-1 flex flex-col">
-                  <h3 className="font-medium text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                    {article.title.length > 50 ? article.title.substring(0, 48) + ".." : article.title}
-                  </h3>
-                  <Badge
-                    variant="secondary"
-                    className={`font-normal text-xs self-start ${
-                      article.tags[0] === tag ? "bg-primary/20 text-primary" : ""
-                    }`}
-                  >
-                    {article.tags[0]}
-                  </Badge>
-                </div>
-              </div>
-            </Link>
+            <ArticleCard key={article.id} article={article} />
           ))}
         </div>
       ) : (

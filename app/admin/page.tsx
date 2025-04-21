@@ -12,7 +12,8 @@ export default function AdminPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 記事管理 */}
+      <div className="mb-8">
         <Link href="/admin/articles" className="block group">
           <Card className="h-full transition-all group-hover:shadow-md">
             <CardHeader>
@@ -27,7 +28,10 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         </Link>
+      </div>
 
+      {/* カテゴリ管理とタグ管理を横に並べる */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link href="/admin/categories" className="block group">
           <Card className="h-full transition-all group-hover:shadow-md">
             <CardHeader>
