@@ -1,11 +1,10 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ChevronRight, ArrowLeft, Calendar, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ChevronRight, Calendar, Clock } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
@@ -121,25 +120,36 @@ const articles = [
   },
 ]
 
-export default function ArticlePage() {
-  const params = useParams()
-  const router = useRouter()
-  const id = Number(params.id)
-  const [article, setArticle] = useState<any>(null)
-  const [activeHeading, setActiveHeading] = useState("")
-  const [isArticleFound, setIsArticleFound] = useState(false)
+import { getArticleById } from "@/actions/article-actions"
+import { notFound } from "next/navigation"
+// 他のインポート...
 
-  useEffect(() => {
-    // IDに基づいて記事を検索
-    const foundArticle = articles.find((article) => article.id === id)
-    if (foundArticle) {
-      setArticle(foundArticle)
-      setIsArticleFound(true)
-    } else {
-      setArticle(null)
-      setIsArticleFound(false)
-    }
-  }, [id])
+export default async function ArticlePage({ params }: { params: { id: string } }) {
+  const id = Number.parseInt(params.id)
+  const article = await getArticleById(id)
+
+  if (!article) {
+    notFound()
+  }
+
+  // 記事の表示ロジック...
+
+  const router = useRouter()
+  //const id = Number(params.id)
+  const [activeHeading, setActiveHeading] = useState("")
+  //const [isArticleFound, setIsArticleFound] = useState(false)
+
+  // useEffect(() => {
+  //   // IDに基づいて記事を検索
+  //   const foundArticle = articles.find((article) => article.id === id)
+  //   if (foundArticle) {
+  //     setArticle(foundArticle)
+  //     setIsArticleFound(true)
+  //   } else {
+  //     setArticle(null)
+  //     setIsArticleFound(false)
+  //   }
+  // }, [id])
 
   // スクロール位置に基づいて現在のセクションを更新
   useEffect(() => {
@@ -168,16 +178,16 @@ export default function ArticlePage() {
   }, [article])
 
   // 記事が見つからない場合
-  if (!isArticleFound) {
-    return (
-      <div className="max-w-5xl mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">記事が見つかりませんでした</h1>
-        <Button onClick={() => router.push("/")} variant="outline">
-          <ArrowLeft className="mr-2 h-4 w-4" /> トップページに戻る
-        </Button>
-      </div>
-    )
-  }
+  // if (!isArticleFound) {
+  //   return (
+  //     <div className="max-w-5xl mx-auto p-6 text-center">
+  //       <h1 className="text-2xl font-bold mb-4">記事が見つかりませんでした</h1>
+  //       <Button onClick={() => router.push("/")} variant="outline">
+  //         <ArrowLeft className="mr-2 h-4 w-4" /> トップページに戻る
+  //       </Button>
+  //     </div>
+  //   )
+  // }
 
   // 記事データがロード中の場合
   if (!article) {

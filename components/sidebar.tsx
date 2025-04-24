@@ -153,13 +153,13 @@ export default function Sidebar() {
                   </button>
 
                   {/* 中カテゴリ */}
-                  <ul className="space-y-1 pl-2">
+                  <ul className="space-y-1">
                     {category.items.map((item) => (
                       <li key={item.slug}>
                         <button
                           onClick={() => handleCategoryClick(item.slug, false)}
                           className={cn(
-                            "text-sm w-full text-left py-1 px-2 rounded-sm transition-colors",
+                            "text-sm w-full text-left py-1 px-2 pl-0 rounded-sm transition-colors",
                             pathname === `/category/${item.slug}`
                               ? "bg-primary/10 text-primary font-medium"
                               : "text-gray-600 hover:bg-gray-200/50",

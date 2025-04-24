@@ -26,6 +26,7 @@ export default function RootLayout({
     <html lang="ja" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <meta name="robots" content="noindex, nofollow" />
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
