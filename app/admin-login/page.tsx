@@ -9,16 +9,47 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { createServerSupabaseClient } from "@/lib/supabase"
+
+// ログイン処理のサーバーアクション
+async function loginAdmin(username: string, password: string) {
+  "use server"
+
+  const supabase = createServerSupabaseClient()
+
+  try {
+    // ユーザー名でadminを検索
+    const { data, error } = await supabase
+      .from("admins")
+      .select("id, username, password_hash")
+      .eq("username", username)
+      .single()
+
+    if (error || !data) {
+      return { success: false, message: "ユーザー名またはパスワードが正しくありません" }
+    }
+
+    // パスワードの検証
+    // 実際の実装では、bcryptなどを使用してパスワードを検証します
+    // ここでは簡易的な実装としています
+    if (data.password_hash !== password) {
+      return { success: false, message: "ユーザー名またはパスワードが正しくありません" }
+    }
+
+    // 認証成功
+    return { success: true, userId: data.id }
+  } catch (error) {
+    console.error("Login error:", error)
+    return { success: false, message: "ログイン処理中にエラーが発生しました" }
+  }
+}
 
 export default function AdminLoginPage() {
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-
-  // 実際のアプリケーションでは、このパスワードはサーバーサイドで安全に保存・検証する必要があります
-  // ここでは簡易的な実装として、クライアントサイドでパスワードを検証しています
-  const ADMIN_PASSWORD = "admin123" // 実際の実装では環境変数などで安全に管理してください
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,20 +57,19 @@ export default function AdminLoginPage() {
     setLoading(true)
 
     try {
-      // パスワードの検証
-      if (password === ADMIN_PASSWORD) {
-        // パスワードが正しい場合、Cookieを設定してログイン状態を保存
-        // 実際のアプリケーションでは、サーバーサイドでセッションを管理する必要があります
-        document.cookie = "admin_authenticated=true; path=/; max-age=3600" // 1時間有効
+      const result = await loginAdmin(username, password)
 
-        // 管理画面にリダイレクト
+      if (result.success) {
+        // 認証成功時の処理
+        // 実際の実装では、セッションやCookieを設定します
+        document.cookie = "admin_authenticated=true; path=/; max-age=3600" // 1時間有効
         router.push("/admin")
       } else {
-        setError("パスワードが正しくありません")
+        setError(result.message || "ログインに失敗しました")
       }
     } catch (err) {
-      setError("ログイン処理中にエラーが発生しました")
       console.error(err)
+      setError("ログイン処理中にエラーが発生しました")
     } finally {
       setLoading(false)
     }
@@ -50,7 +80,7 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>管理者ログイン</CardTitle>
-          <CardDescription>管理機能にアクセスするにはパスワードを入力してください</CardDescription>
+          <CardDescription>管理機能にアクセスするにはログインしてください</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent>
@@ -60,6 +90,10 @@ export default function AdminLoginPage() {
               </Alert>
             )}
             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">ユーザー名</Label>
+                <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="password">パスワード</Label>
                 <Input

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, Suspense } from "react"
+import { useState, Suspense, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Search, Settings } from "lucide-react"
@@ -10,51 +10,56 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
-// サンプルデータ - 大カテゴリと中カテゴリの階層構造
-const categories = [
+// サンプルカテゴリデータ（データベース連携が完了するまでの仮データ）
+const sampleCategories = [
   {
+    id: 1,
     name: "UIデザイン",
-    slug: "uidesign", // 大カテゴリのスラッグは小文字で統一
+    slug: "uidesign",
     items: [
-      { name: "色彩理論", slug: "色彩理論" },
-      { name: "タイポグラフィ", slug: "タイポグラフィ" },
-      { name: "レイアウト", slug: "レイアウト" },
-      { name: "アクセシビリティ", slug: "アクセシビリティ" },
+      { id: 5, name: "色彩理論", slug: "色彩理論" },
+      { id: 6, name: "タイポグラフィ", slug: "タイポグラフィ" },
+      { id: 7, name: "レイアウト", slug: "レイアウト" },
+      { id: 8, name: "アクセシビリティ", slug: "アクセシビリティ" },
     ],
   },
   {
+    id: 2,
     name: "UXデザイン",
     slug: "uxdesign",
     items: [
-      { name: "ユーザーリサーチ", slug: "ユーザーリサーチ" },
-      { name: "ペルソナ", slug: "ペルソナ" },
-      { name: "ユーザージャーニー", slug: "ユーザージャーニー" },
-      { name: "プロトタイピング", slug: "プロトタイピング" },
+      { id: 9, name: "ユーザーリサーチ", slug: "ユーザーリサーチ" },
+      { id: 10, name: "ペルソナ", slug: "ペルソナ" },
+      { id: 11, name: "ユーザージャーニー", slug: "ユーザージャーニー" },
+      { id: 12, name: "プロトタイピング", slug: "プロトタイピング" },
     ],
   },
   {
+    id: 3,
     name: "グラフィックデザイン",
     slug: "graphicdesign",
     items: [
-      { name: "ロゴデザイン", slug: "ロゴデザイン" },
-      { name: "ブランディング", slug: "ブランディング" },
-      { name: "印刷デザイン", slug: "印刷デザイン" },
-      { name: "イラストレーション", slug: "イラストレーション" },
+      { id: 13, name: "ロゴデザイン", slug: "ロゴデザイン" },
+      { id: 14, name: "ブランディング", slug: "ブランディング" },
+      { id: 15, name: "印刷デザイン", slug: "印刷デザイン" },
+      { id: 16, name: "イラストレーション", slug: "イラストレーション" },
     ],
   },
   {
+    id: 4,
     name: "デザインツール",
     slug: "designtools",
     items: [
-      { name: "Figma", slug: "figma" },
-      { name: "Adobe XD", slug: "adobe-xd" },
-      { name: "Sketch", slug: "sketch" },
-      { name: "Photoshop", slug: "photoshop" },
-      { name: "Illustrator", slug: "illustrator" },
+      { id: 17, name: "Figma", slug: "figma" },
+      { id: 18, name: "Adobe XD", slug: "adobe-xd" },
+      { id: 19, name: "Sketch", slug: "sketch" },
+      { id: 20, name: "Photoshop", slug: "photoshop" },
+      { id: 21, name: "Illustrator", slug: "illustrator" },
     ],
   },
 ]
 
+// タグのサンプルデータ
 const tags = [
   "初心者向け",
   "上級者向け",
@@ -98,13 +103,32 @@ function SearchForm() {
 export default function Sidebar() {
   const router = useRouter()
   const pathname = usePathname()
+  const [categories, setCategories] = useState<any[]>(sampleCategories)
+  const [loading, setLoading] = useState(false)
+
+  // カテゴリデータの取得
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        setLoading(true)
+        // データベースからカテゴリを取得する処理
+        // 現時点ではサンプルデータを使用
+        // const data = await getCategories()
+        // if (data && data.length > 0) {
+        //   setCategories(data)
+        // }
+      } catch (error) {
+        console.error("Error fetching categories:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   const handleCategoryClick = (slug: string, isMainCategory: boolean) => {
-    if (isMainCategory) {
-      router.push(`/category/${slug}`)
-    } else {
-      router.push(`/category/${slug}`)
-    }
+    router.push(`/category/${slug}`)
   }
 
   const handleTagClick = (tag: string) => {
@@ -137,41 +161,60 @@ export default function Sidebar() {
       <ScrollArea className="flex-1">
         <div className="p-4">
           <div className="space-y-6">
-            {/* カテゴリ - ラベルを削除 */}
+            {/* カテゴリ */}
             <div className="space-y-5">
-              {categories.map((category) => (
-                <div key={category.name} className="space-y-1">
-                  {/* 大カテゴリ - クリック可能に変更 */}
-                  <button
-                    onClick={() => handleCategoryClick(category.slug, true)}
-                    className={cn(
-                      "text-sm font-semibold w-full text-left py-1 rounded-sm transition-colors",
-                      pathname === `/category/${category.slug}` ? "text-primary" : "text-gray-700 hover:text-primary",
-                    )}
-                  >
-                    {category.name}
-                  </button>
+              {loading
+                ? // ローディング表示
+                  Array(4)
+                    .fill(0)
+                    .map((_, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="h-5 bg-gray-100 rounded-md w-24 animate-pulse"></div>
+                        <div className="space-y-1 pl-2">
+                          {Array(3)
+                            .fill(0)
+                            .map((_, i) => (
+                              <div key={i} className="h-4 bg-gray-100 rounded-md w-32 animate-pulse"></div>
+                            ))}
+                        </div>
+                      </div>
+                    ))
+                : // カテゴリ表示
+                  categories.map((category) => (
+                    <div key={category.id} className="space-y-1">
+                      {/* 大カテゴリ - クリック可能に変更 */}
+                      <button
+                        onClick={() => handleCategoryClick(category.slug, true)}
+                        className={cn(
+                          "text-sm font-semibold w-full text-left py-1 rounded-sm transition-colors",
+                          pathname === `/category/${category.slug}`
+                            ? "text-primary"
+                            : "text-gray-700 hover:text-primary",
+                        )}
+                      >
+                        {category.name}
+                      </button>
 
-                  {/* 中カテゴリ */}
-                  <ul className="space-y-1">
-                    {category.items.map((item) => (
-                      <li key={item.slug}>
-                        <button
-                          onClick={() => handleCategoryClick(item.slug, false)}
-                          className={cn(
-                            "text-sm w-full text-left py-1 px-2 pl-0 rounded-sm transition-colors",
-                            pathname === `/category/${item.slug}`
-                              ? "bg-primary/10 text-primary font-medium"
-                              : "text-gray-600 hover:bg-gray-200/50",
-                          )}
-                        >
-                          {item.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+                      {/* 中カテゴリ */}
+                      <ul className="space-y-1">
+                        {category.items.map((item: any) => (
+                          <li key={item.id}>
+                            <button
+                              onClick={() => handleCategoryClick(item.slug, false)}
+                              className={cn(
+                                "text-sm w-full text-left py-1 mx-3 rounded-sm transition-colors",
+                                pathname === `/category/${item.slug}`
+                                  ? "bg-primary/10 text-primary font-medium"
+                                  : "text-gray-600 hover:bg-gray-200/50",
+                              )}
+                            >
+                              {item.name}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
             </div>
 
             {/* タグ */}
@@ -198,10 +241,10 @@ export default function Sidebar() {
         </div>
       </ScrollArea>
 
-      {/* 管理機能へのリンク - 元のシンプルな形式に戻す */}
+      {/* 管理機能へのリンク */}
       <div className="p-4 mt-auto">
         <Link
-          href="/admin-login"
+          href="/admin"
           className={cn(
             "flex items-center gap-2 text-sm py-2 px-3 rounded-md transition-colors",
             pathname.startsWith("/admin")
